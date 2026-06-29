@@ -10,6 +10,7 @@ import com.example.data.repository.MediaRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.async
 
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -55,14 +56,14 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 MediaRepository.configureApi(getApplication())
                 
                 // Fetch in parallel
-                val trendingMoviesDeferred = kotlinx.coroutines.async { MediaRepository.getTrendingMovies() }
-                val trendingTvDeferred = kotlinx.coroutines.async { MediaRepository.getTrendingTv() }
-                val topRatedDeferred = kotlinx.coroutines.async { MediaRepository.getTopRated() }
-                val recommendedDeferred = kotlinx.coroutines.async { MediaRepository.getRecommended(getApplication()) }
-                val continueWatchingDeferred = kotlinx.coroutines.async { MediaRepository.getContinueWatching(getApplication()) }
-                val animeDeferred = kotlinx.coroutines.async { MediaRepository.getAnime() }
-                val punjabiMoviesDeferred = kotlinx.coroutines.async { MediaRepository.getPunjabiMovies() }
-                val indianMoviesDeferred = kotlinx.coroutines.async { MediaRepository.getIndianMovies() }
+                val trendingMoviesDeferred = async { MediaRepository.getTrendingMovies() }
+                val trendingTvDeferred = async { MediaRepository.getTrendingTv() }
+                val topRatedDeferred = async { MediaRepository.getTopRated() }
+                val recommendedDeferred = async { MediaRepository.getRecommended(getApplication()) }
+                val continueWatchingDeferred = async { MediaRepository.getContinueWatching(getApplication()) }
+                val animeDeferred = async { MediaRepository.getAnime() }
+                val punjabiMoviesDeferred = async { MediaRepository.getPunjabiMovies() }
+                val indianMoviesDeferred = async { MediaRepository.getIndianMovies() }
 
                 val movies = trendingMoviesDeferred.await()
                 _trendingMovies.value = movies

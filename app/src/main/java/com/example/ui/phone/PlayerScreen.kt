@@ -33,6 +33,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.ui.PlayerView
 import androidx.navigation.NavController
 import com.example.data.repository.MediaRepository
+import com.example.data.local.Prefs
 import com.example.player.PlayerState
 import com.example.player.VideoViewModel
 import kotlinx.coroutines.delay
