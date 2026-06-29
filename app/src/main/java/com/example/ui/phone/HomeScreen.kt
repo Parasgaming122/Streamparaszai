@@ -63,17 +63,16 @@ fun HomeScreen(
             .background(colors.bg)
     ) {
         if (isLoading) {
-            val brush = shimmerBrush()
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
             ) {
-                ShimmerHeroBanner(shimmerBrush = brush)
+                ShimmerHeroBanner()
                 Spacer(modifier = Modifier.height(16.dp))
-                ShimmerContentRow(shimmerBrush = brush)
+                ShimmerContentRow()
                 Spacer(modifier = Modifier.height(16.dp))
-                ShimmerContentRow(shimmerBrush = brush)
+                ShimmerContentRow()
             }
         } else {
             Column(
@@ -179,7 +178,7 @@ fun HeroBanner(
     navController: NavController
 ) {
     val colors = LocalStreambertColors.current
-    val backdropUrl = TmdbApi.imgUrl(hero.backdropPath, "original")
+    val backdropUrl = TmdbApi.imgUrl(hero.backdropPath, "w780")
 
     Box(
         modifier = Modifier

@@ -145,7 +145,12 @@ fun TvPlayerScreen(
                     loadUrl(streamUrl)
                 }
             },
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            onRelease = { webView ->
+                webView.stopLoading()
+                webView.loadUrl("about:blank")
+                webView.destroy()
+            }
         )
 
         // Leanback Control Overlay

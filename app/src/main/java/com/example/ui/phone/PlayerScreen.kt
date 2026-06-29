@@ -33,6 +33,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.ui.PlayerView
 import androidx.navigation.NavController
 import com.example.data.repository.MediaRepository
+import com.example.data.local.Prefs
 import com.example.player.PlayerState
 import com.example.player.VideoViewModel
 import kotlinx.coroutines.delay
@@ -73,39 +74,62 @@ fun PlayerScreen(
         }
     }
 
-    // Back button override
-    BackHandler {
-        navController.popBackStack()
+    var initialProgress by remember { mutableStateOf<Float?>(null) }
+
+    // Auto-save progress key
+    val progressKey = if (mediaType == "tv") {
+        "tv_${tmdbId}_s${season ?: 1}_e${episode ?: 1}"
+    } else {
+        "movie_$tmdbId"
     }
 
-    DisposableEffect(streamUrl) {
-        if (isDirectStream) {
-            viewModel.loadStream(streamUrl)
-        }
-        onDispose {
-            viewModel.player.stop()
-        }
+    LaunchedEffect(progressKey) {
+        val progressMap = Prefs.getWatchProgress(context)
+        val savedProgress = progressMap[progressKey] ?: 0f
+        initialProgress = if (savedProgress in 0.02f..0.98f) savedProgress else 0f
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black)
-    ) {
-        if (isDirectStream) {
-            // Direct Stream HLS Player (ExoPlayer)
-            ExoPlayerLayout(
-                viewModel = viewModel,
-                navController = navController,
-                mediaType = mediaType,
-                tmdbId = tmdbId,
-                season = season,
-                episode = episode,
-                title = title
-            )
-        } else {
-            // WebView Embed Iframe Player
-            WebViewLayout(url = streamUrl, navController = navController)
+    val currentProgress = initialProgress
+
+    if (currentProgress == null) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator(color = Color.White)
+        }
+    } else {
+        DisposableEffect(streamUrl) {
+            if (isDirectStream) {
+                viewModel.loadStream(streamUrl, currentProgress)
+            }
+            onDispose {
+                viewModel.player.stop()
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black)
+        ) {
+            if (isDirectStream) {
+                // Direct Stream HLS Player (ExoPlayer)
+                ExoPlayerLayout(
+                    viewModel = viewModel,
+                    navController = navController,
+                    mediaType = mediaType,
+                    tmdbId = tmdbId,
+                    season = season,
+                    episode = episode,
+                    title = title
+                )
+            } else {
+                // WebView Embed Iframe Player
+                WebViewLayout(url = streamUrl, navController = navController)
+            }
         }
     }
 }
@@ -362,13 +386,18 @@ fun WebViewLayout(
                     webViewClient = WebViewClient()
                     webChromeClient = WebChromeClient()
                     layoutParams = ViewGroup.LayoutParams(
-                        ViewGroup.LayoutParams.MATCH_PARENT,
-                        ViewGroup.LayoutParams.MATCH_PARENT
+                         ViewGroup.LayoutParams.MATCH_PARENT,
+                         ViewGroup.LayoutParams.MATCH_PARENT
                     )
                     loadUrl(url)
                 }
             },
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            onRelease = { webView ->
+                webView.stopLoading()
+                webView.loadUrl("about:blank")
+                webView.destroy()
+            }
         )
 
         // Close Floating Button for embed views

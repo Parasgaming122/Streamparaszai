@@ -31,6 +31,10 @@ import com.example.ui.phone.*
 import com.example.ui.theme.LocalStreambertColors
 import com.example.ui.theme.StreambertTheme
 import com.example.ui.tv.*
+import coil.ImageLoader
+import coil.compose.LocalImageLoader
+import coil.disk.DiskCache
+import coil.memory.MemoryCache
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,6 +42,23 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val context = LocalContext.current
+            val imageLoader = remember(context) {
+                ImageLoader.Builder(context)
+                    .memoryCache {
+                        MemoryCache.Builder(context)
+                            .maxSizePercent(0.15)
+                            .build()
+                    }
+                    .diskCache {
+                        DiskCache.Builder()
+                            .directory(context.cacheDir.resolve("image_cache"))
+                            .maxSizeBytes(50 * 1024 * 1024) // 50MB
+                            .build()
+                    }
+                    .crossfade(true)
+                    .build()
+            }
+
             var setupDone by remember { mutableStateOf<Boolean?>(null) }
             var isTvMode by remember { mutableStateOf(false) }
             var themeStyle by remember { mutableStateOf("dark") }
@@ -55,36 +76,38 @@ class MainActivity : ComponentActivity() {
                 MediaRepository.configureApi(context)
             }
 
-            if (setupDone == null) {
-                // Initial Loading Screen
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(color = Color.Red)
-                }
-            } else {
-                StreambertTheme(
-                    themeId = themeStyle,
-                    accentHex = accentColorHex
-                ) {
-                    if (setupDone == false) {
-                        SetupScreen(
-                            onSetupComplete = {
-                                keyToRefresh++
-                            }
-                        )
-                    } else {
-                        if (isTvMode) {
-                            TvAppNavigation(
-                                onSettingsChanged = { keyToRefresh++ }
+            CompositionLocalProvider(LocalImageLoader provides imageLoader) {
+                if (setupDone == null) {
+                    // Initial Loading Screen
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Black),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = Color.Red)
+                    }
+                } else {
+                    StreambertTheme(
+                        themeId = themeStyle,
+                        accentHex = accentColorHex
+                    ) {
+                        if (setupDone == false) {
+                            SetupScreen(
+                                onSetupComplete = {
+                                    keyToRefresh++
+                                }
                             )
                         } else {
-                            PhoneAppNavigation(
-                                onSettingsChanged = { keyToRefresh++ }
-                            )
+                            if (isTvMode) {
+                                TvAppNavigation(
+                                    onSettingsChanged = { keyToRefresh++ }
+                                )
+                            } else {
+                                PhoneAppNavigation(
+                                    onSettingsChanged = { keyToRefresh++ }
+                                )
+                            }
                         }
                     }
                 }

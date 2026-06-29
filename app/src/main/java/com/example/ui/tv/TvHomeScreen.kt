@@ -97,15 +97,14 @@ fun TvHomeScreen(
                 .padding(start = 8.dp, top = 16.dp, end = 16.dp)
         ) {
             if (isLoading) {
-                val brush = shimmerBrush()
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
                 ) {
-                    ShimmerHeroBanner(shimmerBrush = brush)
+                    ShimmerHeroBanner()
                     Spacer(modifier = Modifier.height(24.dp))
-                    ShimmerContentRow(shimmerBrush = brush)
+                    ShimmerContentRow()
                 }
             } else {
                 Column(
@@ -319,7 +318,7 @@ fun TvHeroSection(
     ) {
         // Image
         AsyncImage(
-            model = TmdbApi.imgUrl(hero.backdropPath, "original"),
+            model = TmdbApi.imgUrl(hero.backdropPath, "w780"),
             contentDescription = hero.displayTitle,
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
