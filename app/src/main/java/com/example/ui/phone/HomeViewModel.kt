@@ -55,15 +55,24 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 MediaRepository.configureApi(getApplication())
                 
                 // Fetch in parallel
-                val movies = MediaRepository.getTrendingMovies()
+                val trendingMoviesDeferred = kotlinx.coroutines.async { MediaRepository.getTrendingMovies() }
+                val trendingTvDeferred = kotlinx.coroutines.async { MediaRepository.getTrendingTv() }
+                val topRatedDeferred = kotlinx.coroutines.async { MediaRepository.getTopRated() }
+                val recommendedDeferred = kotlinx.coroutines.async { MediaRepository.getRecommended(getApplication()) }
+                val continueWatchingDeferred = kotlinx.coroutines.async { MediaRepository.getContinueWatching(getApplication()) }
+                val animeDeferred = kotlinx.coroutines.async { MediaRepository.getAnime() }
+                val punjabiMoviesDeferred = kotlinx.coroutines.async { MediaRepository.getPunjabiMovies() }
+                val indianMoviesDeferred = kotlinx.coroutines.async { MediaRepository.getIndianMovies() }
+
+                val movies = trendingMoviesDeferred.await()
                 _trendingMovies.value = movies
-                _trendingTv.value = MediaRepository.getTrendingTv()
-                _topRated.value = MediaRepository.getTopRated()
-                _recommended.value = MediaRepository.getRecommended(getApplication())
-                _continueWatching.value = MediaRepository.getContinueWatching(getApplication())
-                _anime.value = MediaRepository.getAnime()
-                _punjabiMovies.value = MediaRepository.getPunjabiMovies()
-                _indianMovies.value = MediaRepository.getIndianMovies()
+                _trendingTv.value = trendingTvDeferred.await()
+                _topRated.value = topRatedDeferred.await()
+                _recommended.value = recommendedDeferred.await()
+                _continueWatching.value = continueWatchingDeferred.await()
+                _anime.value = animeDeferred.await()
+                _punjabiMovies.value = punjabiMoviesDeferred.await()
+                _indianMovies.value = indianMoviesDeferred.await()
 
                 if (movies.isNotEmpty()) {
                     _heroMedia.value = movies.shuffled().firstOrNull() ?: movies.first()

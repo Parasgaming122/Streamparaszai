@@ -12,6 +12,7 @@ import kotlinx.coroutines.withContext
 object MediaRepository {
 
     suspend fun configureApi(context: Context) {
+        com.example.data.api.NetworkClient.initialize(context)
         var key = Prefs.getTmdbKey(context) ?: ""
         if (key.isBlank()) {
             key = try {

@@ -14,7 +14,7 @@ import org.json.JSONObject
 import java.util.concurrent.ConcurrentHashMap
 
 object AniListApi {
-    private val client = OkHttpClient()
+    private val client get() = NetworkClient.client
     private val moshi = Moshi.Builder().addLast(KotlinJsonAdapterFactory()).build()
     private val mediaAdapter = moshi.adapter(AniListMedia::class.java)
 

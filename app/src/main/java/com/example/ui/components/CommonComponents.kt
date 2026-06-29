@@ -21,12 +21,13 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import com.example.ui.theme.LocalStreambertColors
 
+import androidx.compose.ui.draw.drawBehind
+
 /**
- * Creates an elegant, high-performance linear gradient shimmer brush
- * which is optimized to prevent unnecessary allocations.
+ * Creates an elegant, high-performance linear gradient shimmer modifier
+ * which draws the shimmer in the draw phase to prevent unnecessary recompositions.
  */
-@Composable
-fun shimmerBrush(targetValue: Float = 1000f, durationMillis: Int = 1200): Brush {
+fun Modifier.shimmer(): Modifier = composed {
     val colors = LocalStreambertColors.current
     val shimmerColors = listOf(
         colors.surface2,
@@ -37,19 +38,22 @@ fun shimmerBrush(targetValue: Float = 1000f, durationMillis: Int = 1200): Brush 
     val transition = rememberInfiniteTransition(label = "shimmer")
     val translateAnimation = transition.animateFloat(
         initialValue = 0f,
-        targetValue = targetValue,
+        targetValue = 1000f,
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis, easing = LinearEasing),
+            animation = tween(1200, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
         label = "shimmer_translate"
     )
 
-    return Brush.linearGradient(
-        colors = shimmerColors,
-        start = Offset.Zero,
-        end = Offset(x = translateAnimation.value, y = translateAnimation.value)
-    )
+    this.drawBehind {
+        val brush = Brush.linearGradient(
+            colors = shimmerColors,
+            start = Offset.Zero,
+            end = Offset(x = translateAnimation.value, y = translateAnimation.value)
+        )
+        drawRect(brush = brush)
+    }
 }
 
 /**
@@ -105,14 +109,14 @@ fun Modifier.scaleOnFocus() = composed {
  * Shimmer media card placeholder.
  */
 @Composable
-fun ShimmerMediaCard(shimmerBrush: Brush) {
+fun ShimmerMediaCard() {
     Column(modifier = Modifier.width(130.dp)) {
         Box(
             modifier = Modifier
                 .width(130.dp)
                 .height(195.dp)
                 .clip(RoundedCornerShape(8.dp))
-                .background(shimmerBrush)
+                .shimmer()
         )
         Spacer(modifier = Modifier.height(8.dp))
         Box(
@@ -120,7 +124,7 @@ fun ShimmerMediaCard(shimmerBrush: Brush) {
                 .fillMaxWidth(0.8f)
                 .height(14.dp)
                 .clip(RoundedCornerShape(4.dp))
-                .background(shimmerBrush)
+                .shimmer()
         )
         Spacer(modifier = Modifier.height(4.dp))
         Box(
@@ -128,7 +132,7 @@ fun ShimmerMediaCard(shimmerBrush: Brush) {
                 .fillMaxWidth(0.4f)
                 .height(11.dp)
                 .clip(RoundedCornerShape(4.dp))
-                .background(shimmerBrush)
+                .shimmer()
         )
     }
 }
@@ -137,7 +141,7 @@ fun ShimmerMediaCard(shimmerBrush: Brush) {
  * Shimmer row component.
  */
 @Composable
-fun ShimmerContentRow(shimmerBrush: Brush) {
+fun ShimmerContentRow() {
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -149,7 +153,7 @@ fun ShimmerContentRow(shimmerBrush: Brush) {
                 .width(180.dp)
                 .height(20.dp)
                 .clip(RoundedCornerShape(4.dp))
-                .background(shimmerBrush)
+                .shimmer()
         )
         LazyRow(
             contentPadding = PaddingValues(horizontal = 16.dp),
@@ -157,7 +161,7 @@ fun ShimmerContentRow(shimmerBrush: Brush) {
             modifier = Modifier.fillMaxWidth()
         ) {
             items(5) {
-                ShimmerMediaCard(shimmerBrush = shimmerBrush)
+                ShimmerMediaCard()
             }
         }
     }
@@ -167,12 +171,12 @@ fun ShimmerContentRow(shimmerBrush: Brush) {
  * Shimmer Hero Banner.
  */
 @Composable
-fun ShimmerHeroBanner(shimmerBrush: Brush) {
+fun ShimmerHeroBanner() {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .height(420.dp)
-            .background(shimmerBrush)
+            .shimmer()
     ) {
         Column(
             modifier = Modifier
@@ -185,7 +189,7 @@ fun ShimmerHeroBanner(shimmerBrush: Brush) {
                     .fillMaxWidth(0.6f)
                     .height(28.dp)
                     .clip(RoundedCornerShape(4.dp))
-                    .background(shimmerBrush)
+                    .shimmer()
             )
             Spacer(modifier = Modifier.height(12.dp))
             Box(
@@ -193,7 +197,7 @@ fun ShimmerHeroBanner(shimmerBrush: Brush) {
                     .fillMaxWidth(0.4f)
                     .height(16.dp)
                     .clip(RoundedCornerShape(4.dp))
-                    .background(shimmerBrush)
+                    .shimmer()
             )
             Spacer(modifier = Modifier.height(12.dp))
             Box(
@@ -201,7 +205,7 @@ fun ShimmerHeroBanner(shimmerBrush: Brush) {
                     .fillMaxWidth()
                     .height(48.dp)
                     .clip(RoundedCornerShape(4.dp))
-                    .background(shimmerBrush)
+                    .shimmer()
             )
         }
     }

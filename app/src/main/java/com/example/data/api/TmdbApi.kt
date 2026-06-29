@@ -158,6 +158,11 @@ object TmdbApi {
 
     private val retrofit = Retrofit.Builder()
         .baseUrl("https://api.themoviedb.org/3/")
+        .callFactory(object : okhttp3.Call.Factory {
+            override fun newCall(request: okhttp3.Request): okhttp3.Call {
+                return NetworkClient.client.newCall(request)
+            }
+        })
         .addConverterFactory(MoshiConverterFactory.create(moshi))
         .build()
 

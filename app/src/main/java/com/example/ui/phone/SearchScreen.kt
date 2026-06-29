@@ -42,7 +42,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun ShimmerSearchResultRow(shimmerBrush: androidx.compose.ui.graphics.Brush) {
+fun ShimmerSearchResultRow() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -53,7 +53,7 @@ fun ShimmerSearchResultRow(shimmerBrush: androidx.compose.ui.graphics.Brush) {
             modifier = Modifier
                 .size(45.dp, 65.dp)
                 .clip(RoundedCornerShape(4.dp))
-                .background(shimmerBrush)
+                .shimmer()
         )
         Spacer(modifier = Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
@@ -62,7 +62,7 @@ fun ShimmerSearchResultRow(shimmerBrush: androidx.compose.ui.graphics.Brush) {
                     .fillMaxWidth(0.6f)
                     .height(16.dp)
                     .clip(RoundedCornerShape(4.dp))
-                    .background(shimmerBrush)
+                    .shimmer()
             )
             Spacer(modifier = Modifier.height(6.dp))
             Box(
@@ -70,7 +70,7 @@ fun ShimmerSearchResultRow(shimmerBrush: androidx.compose.ui.graphics.Brush) {
                     .fillMaxWidth(0.3f)
                     .height(12.dp)
                     .clip(RoundedCornerShape(4.dp))
-                    .background(shimmerBrush)
+                    .shimmer()
             )
         }
     }
@@ -205,14 +205,13 @@ fun SearchScreen(
                 .weight(1f)
         ) {
             if (isLoading) {
-                val brush = shimmerBrush()
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     items(6) {
-                        ShimmerSearchResultRow(shimmerBrush = brush)
+                        ShimmerSearchResultRow()
                     }
                 }
             } else if (query.isBlank()) {

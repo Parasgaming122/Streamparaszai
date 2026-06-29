@@ -198,6 +198,8 @@ fun SettingsScreen(
     }
 
     var keyVisible by remember { mutableStateOf(false) }
+    var showResetConfirm by remember { mutableStateOf(false) }
+    var showClearProgressConfirm by remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -569,8 +571,7 @@ fun SettingsScreen(
 
         Button(
             onClick = {
-                viewModel.clearProgress()
-                Toast.makeText(context, "Watch histories and progression cleared!", Toast.LENGTH_SHORT).show()
+                showClearProgressConfirm = true
             },
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.errorContainer),
             modifier = Modifier.fillMaxWidth().height(48.dp).padding(vertical = 4.dp)
@@ -580,17 +581,66 @@ fun SettingsScreen(
 
         Button(
             onClick = {
-                viewModel.resetApp()
-                Toast.makeText(context, "Application resets completely. Please configure a key.", Toast.LENGTH_LONG).show()
-                onSettingsChanged()
-                navController.navigate(Routes.SETUP) {
-                    popUpTo(0) { inclusive = true }
-                }
+                showResetConfirm = true
             },
             colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
             modifier = Modifier.fillMaxWidth().height(48.dp).padding(vertical = 4.dp).testTag("reset_app_button")
         ) {
             Text("Reset App", color = Color.White, fontWeight = FontWeight.Bold)
+        }
+
+        if (showResetConfirm) {
+            AlertDialog(
+                onDismissRequest = { showResetConfirm = false },
+                title = { Text("Reset App", color = colors.text) },
+                text = { Text("Are you sure you want to reset the app? This will clear all settings, watch history, and API keys. This action cannot be undone.", color = colors.text) },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showResetConfirm = false
+                            viewModel.resetApp()
+                            Toast.makeText(context, "Application resets completely. Please configure a key.", Toast.LENGTH_LONG).show()
+                            onSettingsChanged()
+                            navController.navigate(Routes.SETUP) {
+                                popUpTo(0) { inclusive = true }
+                            }
+                        }
+                    ) {
+                        Text("Reset", color = MaterialTheme.colorScheme.error)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showResetConfirm = false }) {
+                        Text("Cancel", color = colors.text)
+                    }
+                },
+                containerColor = colors.surface
+            )
+        }
+
+        if (showClearProgressConfirm) {
+            AlertDialog(
+                onDismissRequest = { showClearProgressConfirm = false },
+                title = { Text("Clear Watch Progress", color = colors.text) },
+                text = { Text("Are you sure you want to clear your watch history and progress? This action cannot be undone.", color = colors.text) },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            showClearProgressConfirm = false
+                            viewModel.clearProgress()
+                            Toast.makeText(context, "Watch histories and progression cleared!", Toast.LENGTH_SHORT).show()
+                        }
+                    ) {
+                        Text("Clear", color = MaterialTheme.colorScheme.error)
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showClearProgressConfirm = false }) {
+                        Text("Cancel", color = colors.text)
+                    }
+                },
+                containerColor = colors.surface
+            )
         }
 
         Spacer(modifier = Modifier.height(100.dp))

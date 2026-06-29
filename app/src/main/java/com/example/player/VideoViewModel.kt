@@ -33,6 +33,7 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
     }
         private set
 
+    private var pendingResumePercent: Float = 0f
     private var progressTrackingJob: Job? = null
 
     init {
@@ -41,7 +42,17 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
                 when (state) {
                     Player.STATE_IDLE -> _playerState.value = PlayerState.IDLE
                     Player.STATE_BUFFERING -> _playerState.value = PlayerState.BUFFERING
-                    Player.STATE_READY -> _playerState.value = PlayerState.READY
+                    Player.STATE_READY -> {
+                        _playerState.value = PlayerState.READY
+                        if (pendingResumePercent > 0f) {
+                            val duration = player.duration
+                            if (duration > 0) {
+                                val seekPosition = (duration * pendingResumePercent).toLong()
+                                player.seekTo(seekPosition)
+                                pendingResumePercent = 0f // consumed
+                            }
+                        }
+                    }
                     Player.STATE_ENDED -> _playerState.value = PlayerState.ENDED
                 }
             }
@@ -57,7 +68,8 @@ class VideoViewModel(application: Application) : AndroidViewModel(application) {
         })
     }
 
-    fun loadStream(url: String) {
+    fun loadStream(url: String, resumePercent: Float = 0f) {
+        pendingResumePercent = resumePercent
         val mediaItem = MediaItem.fromUri(url)
         player.setMediaItem(mediaItem)
         player.prepare()

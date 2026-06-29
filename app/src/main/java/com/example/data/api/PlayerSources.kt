@@ -135,7 +135,7 @@ object PlayerSources {
         season: Int? = null,
         episode: Int? = null
     ): String? {
-        val client = OkHttpClient()
+        val client = NetworkClient.client
         val embedUrl = if (type == "tv" && season != null && episode != null) {
             "https://vsembed.su/embed/tv/$tmdbId/$season/$episode"
         } else {
